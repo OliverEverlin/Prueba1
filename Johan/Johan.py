@@ -1,9 +1,10 @@
 import cv2 as cv
+import cv2
 from matplotlib import pyplot as plt
 import numpy as np
 import argparse
 
-net = cv.dnn.readNetFromTensorflow("graph_opt.pb")
+net = cv.dnn.readNetFromTensorflow("Johan/graph_opt.pb")
 
 inWidth =  368
 inHeight = 368
@@ -20,7 +21,7 @@ POSE_PAIRS = [ ["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", "RElb
                ["LHip", "LKnee"], ["LKnee", "LAnkle"], ["Neck", "Nose"], ["Nose", "REye"],
                ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"] ]
 
-img =  cv.imread("image.jpg")
+img =  cv.imread("Johan/image.jpg")
 plt.imshow(img)
 plt.imshow(cv.cvtColor(img, cv.COLOR_BGR2RGB))
 
@@ -46,7 +47,7 @@ def pose_estimation(frame):
         x = (frameWidth * point[0]) / out.shape[3]
         y = (frameHeight * point[1]) / out.shape[2]
         # Add a point if it's confidence is higher than threshold.
-        points.append((int(x), int(y)) if conf > np.argsort.thr else None) ######
+        points.append((int(x), int(y)) if conf > thr else None) ######
 
     for pair in POSE_PAIRS:
         partFrom = pair[0]
@@ -67,6 +68,12 @@ def pose_estimation(frame):
     cv.putText(frame, '%.2fms' % (t / freq), (10, 20), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
     return frame
 
+estimated_image = pose_estimation(img)
+
+while True:
+    #cv2.imshow("image",cv.cvtColor(estimated_image, cv.COLOR_BGR2RGB))
+    cv2.imshow("image",estimated_image)
+    cv2.waitKey(1)
 # Sorry for being late in replying, please follow the video, when we are performing predictions 
 # and drawing points and joining them , so actually it contains coordinates that is how it is drawing 
 # the points and line on image, but all cordinates are based on image size,you have to subtract or 
