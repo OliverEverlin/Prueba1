@@ -1,5 +1,6 @@
 import cv2 as cv
 import cv2
+import math
 from matplotlib import pyplot as plt
 import numpy as np
 import argparse
@@ -49,6 +50,9 @@ def pose_estimation(frame):
         # Add a point if it's confidence is higher than threshold.
         points.append((int(x), int(y)) if conf > thr else None) ######
 
+    angulo_cabeza = math.atan2(abs(points[0][0]-points[1][0]),abs(points[0][1]-points[1][1]))*180/math.pi
+    print(angulo_cabeza)
+#print(points[0][0])
     for pair in POSE_PAIRS:
         partFrom = pair[0]
         partTo = pair[1]
