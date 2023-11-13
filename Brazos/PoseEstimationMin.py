@@ -15,9 +15,17 @@ while True:
     results = pose.process(imgRGB)
 
     #muestro la deteccion de los puntos en la misma imagen
+    ## Hace que se vean de manera cartesiana
     print(results.pose_landmarks)
+    ##Basicamente que si ve resultados que ubique los puntos en las ubicaciones impresas
     if results.pose_landmarks:
         mpDraw.draw_landmarks(img, results.pose_landmarks, mpPose.POSE_CONNECTIONS)
+        # Asigno un id a cada punto registrado
+        for id, lm in enumerate(results.pose_landmarks.landmark):
+            h,w,c = img.shape #le asigno valores de proporcion
+            print(id, lm)
+            cx, cy = int(lm.x*w), int(lm.y*h)
+            cv2.circle(img, (cx,cy), 5, (255,0,0),cv2.FILLED)
 
     #Configuro el tiempo
     cTime= time.time()
