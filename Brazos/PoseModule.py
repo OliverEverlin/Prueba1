@@ -40,7 +40,7 @@ class poseDetector():
                     cv2.circle(img, (cx, cy), 5, (255, 0, 0), cv2.FILLED)
         return self.lmList
 
-    def findAngle(self, img, p1, p2, p3, draw= True):
+    def findAngle(self, img, p1, p2, p3, draw = True):
         x1, y1 = self.lmList[p1][1:]
         x2, y2 = self.lmList[p2][1:]
         x3, y3 = self.lmList[p3][1:]
@@ -62,6 +62,21 @@ class poseDetector():
 
             cv2.putText(img, str(int(angle)), (x2-56,y2+58), cv2.FONT_HERSHEY_PLAIN,2,(0,0,255),2)
         return angle
+
+    def findDistance(self,img, p1, p2, draw = True):
+        x1, y1, z1 = self.lmList[p1]
+        x2, y2, z2 = self.lmList[p2]
+        distancia = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2 + (z2 - z1) ** 2)
+        if draw:
+            cv2.line(img, (x1, y1),(x2,y2),(0,255,0,3),2)
+
+            cv2.circle(img, (x1, y1), 7, (255, 0, 0), cv2.FILLED)
+            cv2.circle(img, (x1, y1), 10, (255, 0, 0),2)
+            cv2.circle(img, (x2, y2), 7, (255, 0, 0), cv2.FILLED)
+            cv2.circle(img, (x2, y2), 10, (255, 0, 0), 2)
+
+            #cv2.putText(img, str(int(distancia)), ((x1+x2)*0.5-56,(y1+y2)*0.5+58), cv2.FONT_HERSHEY_PLAIN,2,(0,0,255),2)
+        return distancia
 
 
 def main():

@@ -11,6 +11,8 @@ detector= pm.poseDetector()
 count = 0
 dir = 0 #1 para cuando sube, 0 para cuando baja
 
+
+
 while True:
     #img = cv2.imread("PoseVideos/curls1.jpg")
     success, img = cap.read()
@@ -20,7 +22,7 @@ while True:
     lmList = detector.findPosition(img,False)
     if len(lmList)!=0:
         #Derecha
-        #angD = detector.findAngle(img,12,14,16)
+        angD = detector.findAngle(img,12,14,16)
         #Izquierda
         angI = detector.findAngle(img, 11, 13, 15)
 

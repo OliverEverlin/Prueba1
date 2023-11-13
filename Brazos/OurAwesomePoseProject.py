@@ -3,8 +3,8 @@ import cv2
 import time
 import PoseModule as pm
 
-#cap = cv2.VideoCapture('PoseVideos/sporttik.mp4')
-cap = cv2.VideoCapture(0,cv2.CAP_DSHOW)
+cap = cv2.VideoCapture('PoseVideos/sporttik.mp4')
+#cap = cv2.VideoCapture(0,cv2.CAP_DSHOW)
 pTime = 0
 detector= pm.poseDetector()
 
@@ -25,7 +25,7 @@ while True:
     # Configuraciones para mostrar la imagen
     cv2.putText(img, str(int(fps)), (70, 100), cv2.FONT_HERSHEY_PLAIN, 8, (0, 255, 0), 10)
 
-    escala=1
+    escala=0.5
     ANCHO = int(img.shape[1] * escala)
     ALTO = int(img.shape[0] * ANCHO/img.shape[1])
     img = cv2.resize(img, (ANCHO, ALTO))

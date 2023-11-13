@@ -1,5 +1,8 @@
 # Contexto
 Ya no es solo es una prueba XD
+
+![img_1.png](img_1.png)
+
 es necesario determinar ángulos y distancias del cuerpo para el llenado de una matriz RULA. 
 La matriz RULA es una herramienta de evaluación ergonómica que se utiliza para evaluar el 
 riesgo de lesiones en los miembros superiores. La matriz se basa en tres factores:
