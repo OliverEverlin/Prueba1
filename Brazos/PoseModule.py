@@ -1,6 +1,7 @@
 import cv2
 import mediapipe as mp
 import time
+import numpy as np
 import math
 
 class poseDetector():
@@ -77,7 +78,48 @@ class poseDetector():
 
             #cv2.putText(img, str(int(distancia)), ((x1+x2)*0.5-56,(y1+y2)*0.5+58), cv2.FONT_HERSHEY_PLAIN,2,(0,0,255),2)
         return distancia
+    
+    def findVector(self, img, p1, p2, draw = True):
+        x1, y1, z1 = self.lmList[p1]
+        x2, y2, z2 = self.lmList[p2]
+        vector = [x1-x2,y1-y2,z1-z2]
+        if draw:
+            cv2.line(img, (x1, y1),(x2,y2),(0,255,0,3),2)
 
+            cv2.circle(img, (x1, y1), 7, (255, 0, 0), cv2.FILLED)
+            cv2.circle(img, (x1, y1), 10, (255, 0, 0),2)
+            cv2.circle(img, (x2, y2), 7, (255, 0, 0), cv2.FILLED)
+            cv2.circle(img, (x2, y2), 10, (255, 0, 0), 2)
+
+        return vector
+
+    def finddistance(self, img, p1,p2,p3,draw=True):
+        x1, y1, z1 = self.lmList[p1]
+        x2, y2, z2 = self.lmList[p2]
+        x3, y3, z3 = self.lmList[p3]
+        p1 = np.array(p1)
+        p2 = np.array(p2)
+        p = np.array(p3)
+        v = p2 - p1
+        vector_p1_p = p3 - p1
+        u = np.cross(v, vector_p1_p)
+        norma_u = np.linalg.norm(u)
+        norma_v = np.linalg.norm(v)
+        distancia = norma_u / norma_v
+
+        if draw:
+            cv2.line(img, (x1, y1),(x2,y2),(0,255,0,3),2)
+            cv2.line(img, (x3, y3), (x2, y2), (0, 255, 0, 3),2)
+
+            cv2.circle(img, (x1, y1), 7, (255, 0, 0), cv2.FILLED)
+            cv2.circle(img, (x1, y1), 10, (255, 0, 0),2)
+            cv2.circle(img, (x2, y2), 7, (255, 0, 0), cv2.FILLED)
+            cv2.circle(img, (x2, y2), 10, (255, 0, 0), 2)
+            cv2.circle(img, (x3, y3), 7, (255, 0, 0), cv2.FILLED)
+            cv2.circle(img, (x3, y3), 10, (255, 0, 0), 2)
+
+        return distancia
+        
 
 def main():
     cap = cv2.VideoCapture('PoseVideos/sporttik.mp4')

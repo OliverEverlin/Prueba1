@@ -6,7 +6,7 @@ mpDraw = mp.solutions.drawing_utils #para dibujar puntos
 mpPose = mp.solutions.pose
 pose = mpPose.Pose()
 
-cap = cv2.VideoCapture('PoseVideos/sporttik.mp4')
+cap = cv2.VideoCapture('Johan/curls.mp4')
 pTime = 0
 while True:
     #Comentario apra actualizar
