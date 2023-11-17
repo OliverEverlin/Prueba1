@@ -61,9 +61,9 @@ while True:
             if dif > 50:
                 pp = pp + 1
             # +1 brazos abducidos
-            d = detector.finddistance(img,24,12,14)
-            if d > 300:
-                pp = pp + 1
+            #d = detector.finddistance(img,24,12,14)
+            #if d > 300:
+            #    pp = pp + 1
             # - 1 apoyo en el punto
 
 
@@ -148,19 +148,36 @@ print(len(punto_antebrazoD))
 print(len(antebrazoI))
 print(len(punto_antebrazoI))
 df = pd.DataFrame({
-    "Columna 1": filas,
+    "Columna_1": filas,
     #"Columna 2": pandasl,
-    "Columna 3": angulos,
-    "Columna 4": punto_angulos,
-    "Columna 5": estiramiento,
-    "columna 6": punto_estiramiento,
-    "Columna 7": antebrazoD,
-    "Columna 8": punto_antebrazoD,
-    "Columna 9": antebrazoI,
-    "Columna 10": punto_antebrazoI
+    "Columna_3": angulos,
+    "Columna_4": punto_angulos,
+    "Columna_5": estiramiento,
+    "columna_6": punto_estiramiento,
+    "Columna_7": antebrazoD,
+    "Columna_8": punto_antebrazoD,
+    "Columna_9": antebrazoI,
+    "Columna_10": punto_antebrazoI
 })
 
 # Guardar el DataFrame en un archivo CSV
 df.to_csv("3.csv")
-
+print(df)
 # - apoyo en el punto
+
+#graficas puntos angulos
+puntos_a=df["Columna_4"].value_counts()
+puntos_a.plot.pie()
+df.plot(kind = "scatter", x = 'Columna_1', y = 'Columna_4')
+#graficas puntos estiramiento
+#puntos_b=df["Columna_6"].value_counts()
+#puntos_b.plot.pie()
+#df.plot(kind = "scatter", x = 'Columna 1', y = 'Columna 6')
+
+#graficas puntos antebrazo D e I
+puntos_c=df["Columna_8"].value_counts()
+puntos_c.plot.pie()
+df.plot(kind = "scatter", x = 'Columna_1', y = 'Columna_8')
+puntos_d=df["Columna_10"].value_counts()
+puntos_d.plot.pie()
+df.plot(kind = "scatter", x = 'Columna_1', y = 'Columna_10')
