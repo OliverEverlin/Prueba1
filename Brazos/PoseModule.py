@@ -99,7 +99,7 @@ class poseDetector():
         x3, y3, z3 = self.lmList[p3]
         p1 = np.array(p1)
         p2 = np.array(p2)
-        p = np.array(p3)
+        p3 = np.array(p3)
         v = p2 - p1
         vector_p1_p = p3 - p1
         u = np.cross(v, vector_p1_p)
