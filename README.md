@@ -20,7 +20,6 @@ Para determinar los ángulos y distancias del cuerpo, se utilizan las siguientes
 Ángulo de las muñecas: Se mide el ángulo entre las muñecas y el torso.
 Distancia de la mano al trabajo: Se mide la distancia entre la mano y el trabajo.
 
-![img.png](img.png)
 Estas mediciones se utilizan para asignar un puntaje a cada factor de la matriz RULA. El 
 puntaje total de la matriz indica el riesgo de lesiones en los miembros superiores.
 
@@ -54,7 +53,6 @@ Distancia entre el cuerpo y los brazos:
 La evaluación también tiene en cuenta la distancia entre el tronco y los brazos. Se busca determinar si los brazos están extendidos hacia adelante, si están pegados al cuerpo o si hay una posición intermedia.
 Una posición extrema hacia adelante puede aumentar la carga en la parte superior del cuerpo, mientras que una posición muy pegada al cuerpo puede afectar la libertad de movimiento.
 
-
 ## Cuello (angulos) by Johan
 
-## Sentado parado (true or false) by Rick
+

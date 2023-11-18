@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import time
-import PoseModule as pm
+import Posemodule2 as pm
 
 cap = cv2.VideoCapture("AiTrainer/curls.mp4")
 

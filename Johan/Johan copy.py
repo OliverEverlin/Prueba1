@@ -5,7 +5,7 @@ import numpy as np
 import argparse
 
 
-img =  cv.imread("Johan/image.jpg")
+img = cv.imread("Johan/image.jpg")
 plt.imshow(img)
 
 
