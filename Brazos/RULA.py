@@ -1,21 +1,33 @@
+#Proyecto de SIGA
+#Grupo 3
+
+##Desarrollado por:
+## Oliver Rojas Pumaricra
+## Johan Palomino Delgado
+
+
 import cv2
 #import mediapipe as mp
 import time
 import PoseModule as pm
 import numpy as np
 import pandas as pd
-import csv
+import matplotlib.pyplot as plt
+#import csv
 
-cap = cv2.VideoCapture('Johan/curls.mp4')
+cap = cv2.VideoCapture('PoseVideos/curls.mp4') #Poner el nombre de la carpeta del video que usarás
 #cap = cv2.VideoCapture(0,cv2.CAP_DSHOW)
 pTime = 0
 detector= pm.poseDetector()
 count = 0
 dir = 0 #1 para cuando sube, 0 para cuando baja
+
+#Definicion de listas -----------------------------------------------
 pandasl = []
 filas = []
 angulos = []
 punto_angulos = []
+
 # Determinare el grupo A
 ## Puntuación del brazo
 estiramiento=[]
@@ -24,9 +36,13 @@ antebrazoD = []
 punto_antebrazoD = []
 antebrazoI = []
 punto_antebrazoI = []
+
+
 while True:
     #img = cv2.imread("PoseVideos/curls1.jpg")
     success, img = cap.read()
+
+    #IF: Como filtro de valores atípicos
     if img is not None:
         img = detector.findPose(img,False)
         #success, img = cap.read()
@@ -51,7 +67,7 @@ while True:
             #+1 Hombro elevado,
             LargeD= detector.findDistance(img, 12,24)
             LargeBrazo = detector.findDistance(img,12,14)
-            print(LargeD)
+            #print(LargeD)
             if LargeD > LargeBrazo*1.05:
                 pp = pp + 1
             # +1 brazo rotado
@@ -88,7 +104,7 @@ while True:
             bar = np.interp(angI,(30,160),(100,650)) #el minimo y el maximo son diferentes para open cv
             #print(int(angI),per)
 
-
+        #Estimación de FPS
         cTime= time.time()
         fps = 1/(cTime-pTime)
         pTime = cTime
@@ -96,18 +112,18 @@ while True:
                     5, (0, 255, 255), 5)
 
 
-        # Reajuste de tamaños
+        # Reajuste de tamaños: si la imagen sale muy grande o pequeña solo cambia el valor de la escala
         escala = 0.3
         width, height, _ = img.shape
         alto = int(width * escala)
         ancho = int(height * escala)
         img = cv2.resize(img, (ancho, alto))
-
         cv2.imshow("Image", img)
         cv2.waitKey(1)
+
         count+=1
 
-        #Almacenamiento de datos
+        #Almacenamiento de datos: Se alamacena all en una lista
         filas.append(count)
         pandasl.append(1)
         estiramiento.append(int(LargeD))
@@ -120,33 +136,40 @@ while True:
         punto_antebrazoI.append(int(pAntebrazoI))
         #time.sleep(0.5)
     else:
+        ##Se filtrará este valor después
         pandasl.append(-10)
         break
+
+#Termina el bucle ----------------------------------
+
 
 ##Post procesado
 #Analizo los estiramientos
 print("POST")
 
 #+1 Hombro elevado, brazo rotado, brazos abducidos
-for i in range(len(estiramiento)):
-    print(estiramiento[i])
+#for i in range(len(estiramiento)):
+#    print(estiramiento[i])
 # Almacenamiento para analizis de datos
 # with open("2.csv", "w", newline="") as archivo:
 #     writer = csv.writer(archivo)
 #     writer.writerow([filas, pandasl,estiramiento])
 
 # Crear un objeto DataFrame
-print("a")
-print(len(filas))
-#print(len(pandasl))
-print(len(angulos))
-print(len(punto_angulos))
-print(len(estiramiento))
-print(len(punto_estiramiento))
-print(len(antebrazoD))
-print(len(punto_antebrazoD))
-print(len(antebrazoI))
-print(len(punto_antebrazoI))
+
+##Impresión de numero de valores tomados
+print("Se crea el DF")
+# print(len(filas))
+# #print(len(pandasl))
+# print(len(angulos))
+# print(len(punto_angulos))
+# print(len(estiramiento))
+# print(len(punto_estiramiento))
+# print(len(antebrazoD))
+# print(len(punto_antebrazoD))
+# print(len(antebrazoI))
+# print(len(punto_antebrazoI))
+#Se almacenan las listas en el DF
 df = pd.DataFrame({
     "Columna_1": filas,
     #"Columna 2": pandasl,
@@ -161,14 +184,17 @@ df = pd.DataFrame({
 })
 
 # Guardar el DataFrame en un archivo CSV
-df.to_csv("3.csv")
+df.to_csv("4.csv")
 print(df)
 # - apoyo en el punto
 
 #graficas puntos angulos
-puntos_a=df["Columna_4"].value_counts()
+print("Debería comenzar a graficar")
+puntos_a = df["Columna_4"].value_counts()
 puntos_a.plot.pie()
 df.plot(kind = "scatter", x = 'Columna_1', y = 'Columna_4')
+plt.show()
+
 #graficas puntos estiramiento
 #puntos_b=df["Columna_6"].value_counts()
 #puntos_b.plot.pie()
@@ -178,6 +204,10 @@ df.plot(kind = "scatter", x = 'Columna_1', y = 'Columna_4')
 puntos_c=df["Columna_8"].value_counts()
 puntos_c.plot.pie()
 df.plot(kind = "scatter", x = 'Columna_1', y = 'Columna_8')
+plt.show()
+
+
 puntos_d=df["Columna_10"].value_counts()
 puntos_d.plot.pie()
 df.plot(kind = "scatter", x = 'Columna_1', y = 'Columna_10')
+plt.show()
