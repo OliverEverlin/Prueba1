@@ -7,19 +7,29 @@
 
 from tkinter import *
 import tkinter.messagebox as box
-from PIL import ImageTk
 from tkinter import filedialog
+from PIL import Image
+from PIL import ImageTk
+import cv2
+import imutils
 
 class ErgoMetric(Tk):
     def __init__(self):
         super().__init__()
 
+        self.pagprin()
+
+        self.mainloop()
+
+
+    def pagprin(self):
         self.title("Ergo Metric App")
-        self.geometry('400x400')
+        self.geometry('1000x1000')  #400x400 originalmente
         self.iconbitmap('ergo.ico')
-        self.resizable(0,0)
+        #self.resizable(0,0)
         
         self.fondoo='gray'
+        self.fondooB='#727171'
         self.colorbtt='white'
         
         self.configure(bg=self.fondoo)
@@ -27,35 +37,27 @@ class ErgoMetric(Tk):
         #menu
         self.mymenu=Menu(self)
         self.config(menu=self.mymenu)
-        filemenu = Menu(self.mymenu)
-        editmenu = Menu(self.mymenu)
-        helpmenu = Menu(self.mymenu)
+        self.filemenu = Menu(self.mymenu)
+        self.helpmenu = Menu(self.mymenu)
         
-        self.mymenu.add_cascade(label="Archivo", menu=filemenu)
-        self.mymenu.add_cascade(label="Editar", menu=editmenu)
-        self.mymenu.add_cascade(label="Ayuda", menu=helpmenu)
+        self.mymenu.add_cascade(label="Archivo", menu=self.filemenu)
+        self.mymenu.add_cascade(label="Ayuda", menu=self.helpmenu)
 
         #self.filemenu = Menu(self.mymenu, tearoff=0)
-        #self.editmenu = Menu(self.mymenu, tearoff=0)
         #self.helpmenu = Menu(self.mymenu, tearoff=0)
         
-        filemenu = Menu(self.mymenu, tearoff=0)
-        filemenu.add_command(label="Nuevo")
-        filemenu.add_command(label="Abrir")
-        filemenu.add_command(label="Guardar")
-        filemenu.add_command(label="Cerrar")
-        filemenu.add_separator()
-        filemenu.add_command(label="Salir", command=self.quit)
-        
-        editmenu = Menu(self.mymenu, tearoff=0)
-        editmenu.add_command(label="Cortar")
-        editmenu.add_command(label="Copiar")
-        editmenu.add_command(label="Pegar")
+        #self.filemenu = Menu(self.filemenu, tearoff=0)
+        self.filemenu.add_command(label="Reiniciar",command=self.restar)
+        #self.filemenu.add_command(label="Abrir")
+        #self.filemenu.add_command(label="Guardar")
+        #self.filemenu.add_command(label="Cerrar")
+        self.filemenu.add_separator()
+        self.filemenu.add_command(label="Salir", command=self.quit)
 
-        helpmenu = Menu(self.mymenu, tearoff=0)
-        helpmenu.add_command(label="Ayuda")
-        helpmenu.add_separator()
-        helpmenu.add_command(label="Acerca de...")
+        #self.helpmenu = Menu(self.mymenu, tearoff=0)
+        #self.helpmenu.add_command(label="Ayuda")
+        #self.helpmenu.add_separator()
+        self.helpmenu.add_command(label="Info",command=self.info)
 
         #icono de ventana
         #self.iconphoto(False,PhotoImage(file='ergo.ico'))
@@ -69,100 +71,191 @@ class ErgoMetric(Tk):
         
 
         #imagenes
-        self.back = ImageTk.PhotoImage(file='back1.png')
-        self.restar = ImageTk.PhotoImage(file='restar1.png')
-        self.KsT = ImageTk.PhotoImage(file='ErgoMetricAPP.png')
-    
-    
-        #barra lateral izquierda del interfaz
-        self.lateralI=Frame(self,bg=self.fondoo,width=100, height=500)
-        self.lateralI.grid(row=0,column=2,columnspan=6,rowspan=12,sticky='ns')
+        self.KsT = ImageTk.PhotoImage(file='ErgoMetricAPP (1).png')
+        self.regispng = ImageTk.PhotoImage(file='ErgoMetricAPP.png')
+        self.actor = ImageTk.PhotoImage(file='human1.png')
+
+
+        self.defframe1()
+        #self.mainloop()
+
+    def defframe1(self):
+        #frame general de demo mas video
+        self.frame1=Frame(self,bg=self.fondoo,width=200, height=560)
+        self.frame1.grid(row=0,column=2,columnspan=6,rowspan=12,sticky='nswe')
         
-        self.titulo=Label(self.lateralI,image=self.KsT,bg=self.fondoo)
-        self.titulo.grid(row=0,column=2,columnspan=3,rowspan=2,sticky='we')
+        self.titulo=Label(self.frame1,image=self.KsT,bg=self.fondoo)
+        self.titulo.grid(row=0,column=1,columnspan=8,rowspan=2,sticky='we',padx=200,pady=100)
         
-        self.LabName=Label(self.lateralI,text='Nombre: ',font = ('Hightower text', 12,'bold'), bg=self.fondoo,justify=RIGHT)
-        self.LabName.grid(row=3,column=2,columnspan=3,sticky='w')
-        
-        self.EntryName=Entry(self.lateralI,width=30,fg='red',justify=RIGHT)
-        self.EntryName.grid(column=2,row=4,columnspan=3,sticky='w')
+        self.bDemo=Button(self.frame1,text='Demo',font=('Hightower text', 40,'bold'),padx=90,pady=25,
+                          bg=self.fondooB,command=self.democlick)
+        self.bDemo.grid(row=3,column=2,columnspan=3,rowspan=1,sticky='e')
 
-        self.LabLastName=Label(self.lateralI,text='Apellido: ',font = ('Hightower text', 12,'bold'), bg=self.fondoo,justify=RIGHT)
-        self.LabLastName.grid(row=5,column=2,columnspan=3,sticky='w')
+        self.bVideo = Button(self.frame1, text='Video', font=('Hightower text', 40, 'bold'), padx=90, pady=25,
+                            bg=self.fondooB, command=self.videoclick)
+        self.bVideo.grid(row=4, column=2, columnspan=3, rowspan=1, sticky='e')
 
-        self.EntryLastName=Entry(self.lateralI,width=30,fg='black',justify=RIGHT)
-        self.EntryLastName.grid(column=2,row=6,columnspan=3,sticky='w')
-        
-        self.LabAge=Label(self.lateralI,text='Edad: ',font = ('Hightower text', 12,'bold'), bg=self.fondoo,justify=RIGHT)
-        self.LabAge.grid(row=7,column=2,columnspan=3,sticky='w')
-
-        self.EntryAge=Entry(self.lateralI,width=30,fg='black',justify=RIGHT)
-        self.EntryAge.grid(column=2,row=8,columnspan=3,sticky='w')
-        
-        self.LabPeso=Label(self.lateralI,text='Peso: ',font = ('Hightower text', 12,'bold'), bg=self.fondoo,justify=RIGHT)
-        self.LabPeso.grid(row=9,column=2,columnspan=3,sticky='w')
-
-        self.EntryPeso=Entry(self.lateralI,width=30,fg='black',justify=LEFT)
-        self.EntryPeso.grid(column=2,row=10,columnspan=3,sticky='w')
-        
-        
-        #barra lateral de datos de la tabla
-        self.lateral=Frame(self,bg=self.fondoo,width=100, height=500)
-        self.lateral.grid(row=3,column=9,columnspan=3,rowspan=12,sticky='ns')
-
-        self.Binstru=Button(self.lateral,text='Instrucciones', font = ('Hightower text', 12,'bold'), bg = self.colorbtt,command=self.indicaciones)
-        self.Binstru.grid(row=3,column=9,columnspan=3,sticky='we',padx=10,pady=3)
-
-        self.l2=Label(self.lateral,text='Tipo:',justify=LEFT,font = ('Hightower text', 12,'bold'), bg=self.fondoo)
-        self.l2.grid(row=4,column=9,columnspan=3,sticky='w',padx=10,pady=3)
-        
-        ####TIPO DE EVALUACION
-        self.r1=Radiobutton(self.lateral, text="REBA",variable=self.varmodo,value='REBA',state=DISABLED,bg=self.fondoo,font = ('Hightower text', 12,'bold'), command=self.selectModo)
-        self.r1.grid(row=5,column=9,columnspan=3,sticky='w',padx=20,pady=3)
-        
-        self.r2=Radiobutton(self.lateral, text="RULA",variable=self.varmodo,value='RULA',state=NORMAL,bg=self.fondoo,font = ('Hightower text', 12,'bold'), command=self.selectModo)
-        self.r2.grid(row=6,column=9,columnspan=3,sticky='w',padx=20,pady=3)
-        
-        self.r3=Radiobutton(self.lateral, text="OWAS",variable=self.varmodo,value='OWAS',state=DISABLED,bg=self.fondoo,font = ('Hightower text', 12,'bold'), command=self.selectModo)
-        self.r3.grid(row=7,column=9,columnspan=3,sticky='w',padx=20,pady=3)
-        
-        self.r4=Radiobutton(self.lateral, text="NIOSH",variable=self.varmodo,value='NIOSH',state=DISABLED,bg=self.fondoo,font = ('Hightower text', 12,'bold'), command=self.selectModo)
-        self.r4.grid(row=8,column=9,columnspan=3,sticky='w',padx=20,pady=3)
+        self.bRegis = Button(self.frame1, text='Registro', font=('Hightower text', 40,'bold'), padx=90, pady=25,
+                             bg=self.fondooB,command=self.regisclick)
+        self.bRegis.grid(row=3, column=5, columnspan=3, rowspan=4, sticky='e')
 
 
-        self.fileO=Button(self.lateral,text='.',command=self.files)
-        self.fileO.grid(row=9,column=9,sticky='w',padx=20,pady=3)
+    def democlick(self):
+        self.frame1.destroy()
+        #mostrar video
 
-        self.label1=Label(self.lateral, text='Subir Video', bg=self.fondoo)
-        self.label1.grid(row=9,column=10,columnspan=3,sticky='w',padx=20,pady=3)
+    def videoclick(self):
+        self.frame1.destroy()
+
+        self.frame2 = Frame(self, bg=self.fondoo, width=200, height=560)
+        self.frame2.grid(row=0, column=2, columnspan=6, rowspan=12, sticky='nswe')
+
+        self.cap = None
+
+        self.btnIniciar = Button(self.frame2, text="Iniciar", width=45, command=self.iniciar)
+        self.btnIniciar.grid(column=0, row=0, padx=5, pady=5)
+
+        self.btnFinalizar = Button(self.frame2, text="Finalizar", width=45, command=self.finalizar)
+        self.btnFinalizar.grid(column=1, row=0, padx=5, pady=5)
+
+        self.btnAnalizar = Button(self.frame2, text="Analizar", width=45, command=self.analizarv)
+        self.btnAnalizar.grid(column=2, row=0, padx=5, pady=5)
+
+        self.lblVideo = Label(self.frame2)
+        self.lblVideo.grid(column=0, row=1, columnspan=3)
+
+    def analizarv(self):
+        self.frame3 = Frame(self, bg=self.fondoo, width=300, height=600)
+        self.frame3.grid(row=0, column=0, columnspan=12, rowspan=15, sticky='nswe')
+
+        self.Labtitle = Label(self.frame3, text='Puntajes', font=('Hightower text', 50, 'bold'),
+                                   bg=self.fondoo)
+        self.Labtitle.grid(row=0, column=1, columnspan=12, sticky='we', padx=200, pady=30)
+
+        self.actim = Label(self.frame3, image=self.actor, bg=self.fondoo)
+        self.actim.grid(row=1, column=4, columnspan=4, rowspan=8, sticky='we', padx=50, pady=20)
+
+        #derecho
+        self.LabPBrazoD = Label(self.frame3, text='Puntaje brazo: ', font=('Hightower text', 20, 'bold'),
+                              bg=self.fondoo)
+        self.LabPBrazoD.grid(row=3, column=1, columnspan=2, sticky='w', padx=20, pady=10)
+
+        self.LabPAnBrazoD = Label(self.frame3, text='Puntaje antebrazo: ', font=('Hightower text', 20, 'bold'),
+                                  bg=self.fondoo)
+        self.LabPAnBrazoD.grid(row=6, column=1, columnspan=2, sticky='w', padx=20, pady=10)
 
 
-        self.Bback=Button(self,image=self.back, bg = self.colorbtt,state=DISABLED,command=self.backone)
-        self.Bback.grid(row=0,column=9,sticky='we')#,padx=5,pady=5)
-        self.Brstar=Button(self,image=self.restar, bg = self.colorbtt,state=DISABLED,command=self.reinicio)
-        self.Brstar.grid(row=0,column=10,sticky='we')#,padx=5,pady=5)
+        #izquierdo
+        self.LabPBrazoI = Label(self.frame3, text='Puntaje brazo: ', font=('Hightower text', 20, 'bold'),
+                                bg=self.fondoo)
+        self.LabPBrazoI.grid(row=3, column=10, columnspan=2, sticky='w', padx=20, pady=10)
 
-        self.mainloop()
-        
-        
-    
+        self.LabPAnBrazoI = Label(self.frame3, text='Puntaje antebrazo: ', font=('Hightower text', 20, 'bold'),
+                                bg=self.fondoo)
+        self.LabPAnBrazoI.grid(row=6, column=10, columnspan=2, sticky='w', padx=20, pady=10)
 
-    def files(self):
-        self.filename=filedialog.askopenfilename(initialdir="D:\Coding\ErgoMetric",title='Select File',filetypes=(('mp4 files','*.mp4'),('all files','*.*')))
+        #cuello
+        self.LabPCuello = Label(self.frame3, text='Puntaje cuello: ', font=('Hightower text', 20, 'bold'),
+                                  bg=self.fondoo)
+        self.LabPCuello.grid(row=10, column=5, columnspan=3, sticky='W', pady=10)
+
+        #puntaje total
+        self.LabPtotal = Label(self.frame3, text='PUNTAJE TOTAL: ', font=('Hightower text', 20, 'bold'),
+                                bg=self.fondoo)
+        self.LabPtotal.grid(row=12, column=5, columnspan=3, sticky='W', pady=20)
+
+    def regisclick(self):
+        #self.frame1.destroy()
+        self.regis = Toplevel()
+        self.regis.title('Registro')
+        self.regis.geometry('300x500')
+        self.regis.iconbitmap('ergo.ico')
+        self.regis.configure(bg=self.fondoo)
+
+        # barra lateral izquierda del interfaz
+        self.regis.lateralI = Frame(self.regis, bg=self.fondoo, width=100, height=500)
+        self.regis.lateralI.grid(row=0, column=2, columnspan=6, rowspan=12, sticky='ns')
+
+        self.regis.titulo = Label(self.regis.lateralI, image=self.regispng, bg=self.fondoo)
+        self.regis.titulo.grid(row=0, column=2, columnspan=3, rowspan=2, sticky='we',padx=20,pady=10)
+
+        self.regis.LabName = Label(self.regis.lateralI, text='Nombre: ', font=('Hightower text', 12, 'bold'), bg=self.fondoo,
+                             justify=RIGHT)
+        self.regis.LabName.grid(row=3, column=2, columnspan=3, sticky='w',padx=20,pady=10)
+
+        self.regis.EntryName = Entry(self.regis.lateralI, width=30, fg='red', justify=RIGHT)
+        self.regis.EntryName.grid(column=2, row=4, columnspan=3, sticky='w',padx=30)
+
+        self.regis.LabLastName = Label(self.regis.lateralI, text='Apellido: ', font=('Hightower text', 12, 'bold'), bg=self.fondoo,
+                                 justify=RIGHT)
+        self.regis.LabLastName.grid(row=5, column=2, columnspan=3, sticky='w',padx=20,pady=10)
+
+        self.regis.EntryLastName = Entry(self.regis.lateralI, width=30, fg='black', justify=RIGHT)
+        self.regis.EntryLastName.grid(column=2, row=6, columnspan=3, sticky='w',padx=30)
+
+        self.regis.LabAge = Label(self.regis.lateralI, text='Edad: ', font=('Hightower text', 12, 'bold'), bg=self.fondoo,
+                            justify=RIGHT)
+        self.regis.LabAge.grid(row=7, column=2, columnspan=3, sticky='w',padx=20,pady=10)
+
+        self.regis.EntryAge = Entry(self.regis.lateralI, width=30, fg='black', justify=RIGHT)
+        self.regis.EntryAge.grid(column=2, row=8, columnspan=3, sticky='w',padx=30)
+
+        self.regis.LabAges = Label(self.regis.lateralI, text=' años', font=('Hightower text', 12, 'bold'),
+                                  bg=self.fondoo,
+                                  justify=RIGHT)
+        self.regis.LabAges.grid(row=8, column=5,sticky='w', pady=10)
+
+        self.regis.LabPeso = Label(self.regis.lateralI, text='Peso: ', font=('Hightower text', 12, 'bold'), bg=self.fondoo,
+                             justify=RIGHT)
+        self.regis.LabPeso.grid(row=9, column=2, columnspan=3, sticky='w',padx=20,pady=10)
+
+        self.regis.EntryPeso = Entry(self.regis.lateralI, width=30, fg='black', justify=LEFT)
+        self.regis.EntryPeso.grid(column=2, row=10, columnspan=3, sticky='w',padx=30)
+
+        self.bAceptar = Button(self.regis.lateralI, text='Registrar', font=('Hightower text', 20, 'bold'), padx=5, pady=5,
+                            bg=self.fondooB, command=self.regisAclick)
+        self.bAceptar.grid(row=12, column=2, columnspan=3, rowspan=2, sticky='e',padx=50,pady=40)
+
+    def regisAclick(self):
+        #guardar datos para registro
+        self.regis.destroy()
+
+    def iniciar(self):
+        #global self.cap
+        self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        self.visualizar()
+
+    def visualizar(self):
+        #global cap
+        if self.cap is not None:
+            self.ret, self.frame = self.cap.read()
+            if self.ret == True:
+                self.frame = imutils.resize(self.frame, width=640)
+                self.frame = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
+
+                self.im = Image.fromarray(self.frame)
+                self.img = ImageTk.PhotoImage(image=self.im)
+
+                self.lblVideo.configure(image=self.img)
+                self.lblVideo.image = self.img
+                self.lblVideo.after(10, self.visualizar)
+            else:
+                self.lblVideo.image = ""
+                self.cap.release()
 
 
-    def selectModo(self):   #selecciona el modo de juego
-        self.modo=self.varmodo.get()
-
-    def indicaciones(self):   
-        box.showinfo( "Instructivo","1. Ingreso los datos del evaluado\n2. Seleccionar el tipo de evaluación\n3. Añadir el video grabado\n4. Esperar el analisis\n5. Revisar los resultados")
-        
-
-    def reinicio(self):
-        return
-
-    def backone(self):
-        return
+    def finalizar(self):
+        #global cap
+        self.cap.release()
+        #aqui debe estar el analisis del video
 
 
+    def restar(self):
+        self.destroy()
+        self.pagprin()
+
+    def info(self):
+        box.showinfo("Instructivo",
+                     "1. Elegir si será Demo o Video\n2. Registrar los datos"
+                     "\n3. Esperar el analisis\n4. Revisar los resultados")
 
