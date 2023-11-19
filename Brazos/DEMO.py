@@ -64,10 +64,11 @@ while True:
             cuello= detector.promDot(img,11,12)
 
             ANGcuello = (detector.findAngle3DbyVectors(img, head, cuello, budy, draw=True))
-            PCuello = detector.cuelloPuntuation
+            PCuello = detector.cuelloPuntuation(ANGcuello)
 
             # PUNTAJE TOTAL
-            TOTAL= PBRder + PBRizq + ABRder + PABRizq + PCuello #Todos estos valores impresos en el forms
+            TOTAL= PBRder + PBRizq + PABRder + PABRizq + PCuello
+            #Todos estos valores impresos en el forms
 
 
 
