@@ -18,9 +18,9 @@ import matplotlib.pyplot as plt
 
 # import csv
 
-cap = cv2.VideoCapture('PoseVideos/curls.mp4')  # Poner el nombre de la carpeta del video que usarás
+#cap = cv2.VideoCapture('PoseVideos/curls.mp4')  # Poner el nombre de la carpeta del video que usarás
 # cap = cv2.VideoCapture(0,cv2.CAP_DSHOW)
-pTime = 0
+#pTime = 0
 detector = pm.poseDetector()
 count = 0
 
@@ -30,6 +30,9 @@ while True:
 
     # IF: Como filtro de valores atípicos
     if img is not None:
+        #Agregado
+        img= cv2.flip(img,1)
+        #Fin agregado
         img = detector.findPose(img, False)
         lmList = detector.findPosition(img, False)
 

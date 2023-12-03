@@ -71,8 +71,8 @@ while True:
             if LargeD > LargeBrazo*1.05:
                 pp = pp + 1
             # +1 brazo rotado
-            vector_cuerpo = detector.findVector(img, 12, 11)
-            vector_plano_mano = np.cross(detector.findVector(img, 16, 20),detector.findVector(img, 18, 16))
+            vector_cuerpo = detector.findVector(img, 12, 11, False)
+            vector_plano_mano = np.cross(detector.findVector(img, 16, 20, False),detector.findVector(img, 18, 16, False))
             dif = abs(vector_cuerpo[2] - vector_plano_mano[2])
             if dif > 50:
                 pp = pp + 1

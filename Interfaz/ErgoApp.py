@@ -10,8 +10,14 @@ import tkinter.messagebox as box
 from tkinter import filedialog
 from PIL import Image
 from PIL import ImageTk
+import time
 import cv2
 import imutils
+import PoseModule as pm
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
 
 class ErgoMetric(Tk):
     def __init__(self):
@@ -68,6 +74,11 @@ class ErgoMetric(Tk):
         self.modo=''
         self.varss = StringVar()
         self.varss.set('')
+
+        self.detector = pm.poseDetector()
+        self.count = 0
+
+        #self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
         
 
         #imagenes
@@ -92,7 +103,7 @@ class ErgoMetric(Tk):
         self.bDemo.grid(row=3,column=2,columnspan=3,rowspan=1,sticky='e')
 
         self.bVideo = Button(self.frame1, text='Video', font=('Hightower text', 40, 'bold'), padx=90, pady=25,
-                            bg=self.fondooB, command=self.videoclick)
+                            bg=self.fondooB, command=self.iniciar)
         self.bVideo.grid(row=4, column=2, columnspan=3, rowspan=1, sticky='e')
 
         self.bRegis = Button(self.frame1, text='Registro', font=('Hightower text', 40,'bold'), padx=90, pady=25,
@@ -103,6 +114,196 @@ class ErgoMetric(Tk):
     def democlick(self):
         self.frame1.destroy()
         #mostrar video
+        cap = cv2.VideoCapture('PoseVideos/curls.mp4')  # Poner el nombre de la carpeta del video que usarás
+        # cap = cv2.VideoCapture(0,cv2.CAP_DSHOW)
+        pTime = 0
+        detector = pm.poseDetector()
+        count = 0
+        dir = 0  # 1 para cuando sube, 0 para cuando baja
+
+        # Definicion de listas -----------------------------------------------
+        pandasl = []
+        filas = []
+        angulos = []
+        punto_angulos = []
+
+        # Determinare el grupo A
+        ## Puntuación del brazo
+        estiramiento = []
+        punto_estiramiento = []
+        antebrazoD = []
+        punto_antebrazoD = []
+        antebrazoI = []
+        punto_antebrazoI = []
+
+        while True:
+            # img = cv2.imread("PoseVideos/curls1.jpg")
+            success, img = cap.read()
+
+            # IF: Como filtro de valores atípicos
+            if img is not None:
+                img = detector.findPose(img, False)
+                # success, img = cap.read()
+                # img = detector.findPose(img)
+                lmList = detector.findPosition(img, False)
+                if len(lmList) != 0:
+
+                    # Angulo de brazo respecto al torso (puntuaciones)
+                    angBDT = detector.findAngle(img, 14, 12, 24)
+
+                    pBDT = 0  # Puntuacion del brazo
+                    if (angBDT < 20):
+                        pBDT = 1
+                    elif (angBDT < 45):
+                        pBDT = 2
+                    elif (angBDT < 90):
+                        pBDT = 3
+                    else:
+                        pBDT = 4
+
+                    pp = 0
+                    # +1 Hombro elevado,
+                    LargeD = detector.findDistance(img, 12, 24)
+                    LargeBrazo = detector.findDistance(img, 12, 14)
+                    # print(LargeD)
+                    if LargeD > LargeBrazo * 1.05:
+                        pp = pp + 1
+                    # +1 brazo rotado
+                    vector_cuerpo = detector.findVector(img, 12, 11)
+                    vector_plano_mano = np.cross(detector.findVector(img, 16, 20), detector.findVector(img, 18, 16))
+                    dif = abs(vector_cuerpo[2] - vector_plano_mano[2])
+                    if dif > 50:
+                        pp = pp + 1
+                    # +1 brazos abducidos
+                    # d = detector.finddistance(img,24,12,14)
+                    # if d > 300:
+                    #    pp = pp + 1
+                    # - 1 apoyo en el punto
+
+                    # Angulo de antebrazos (puntuaciones)
+                    # Derecha
+                    angD = detector.findAngle(img, 12, 14, 16)
+                    # Izquierda
+                    angI = detector.findAngle(img, 11, 13, 15)
+                    if angD > 60 and angD < 100:
+                        pAntebrazoD = 1
+                    else:
+                        pAntebrazoD = 2
+
+                    if angI > 60 and angI < 100:
+                        pAntebrazoI = 1
+                    else:
+                        pAntebrazoI = 2
+
+                    per = np.interp(angI, (30, 160), (100, 0))
+                    bar = np.interp(angI, (30, 160), (100, 650))  # el minimo y el maximo son diferentes para open cv
+                    # print(int(angI),per)
+
+                # Estimación de FPS
+                cTime = time.time()
+                fps = 1 / (cTime - pTime)
+                pTime = cTime
+                cv2.putText(img, str(int(fps)), (50, 100), cv2.FONT_HERSHEY_PLAIN,
+                            5, (0, 255, 255), 5)
+
+                # Reajuste de tamaños: si la imagen sale muy grande o pequeña solo cambia el valor de la escala
+                escala = 0.3
+                width, height, _ = img.shape
+                alto = int(width * escala)
+                ancho = int(height * escala)
+                img = cv2.resize(img, (ancho, alto))
+                cv2.imshow("Image", img)
+                cv2.waitKey(1)
+
+                count += 1
+
+                # Almacenamiento de datos: Se alamacena all en una lista
+                filas.append(count)
+                pandasl.append(1)
+                estiramiento.append(int(LargeD))
+                punto_estiramiento.append(int(pp))
+                angulos.append(int(angBDT))
+                punto_angulos.append(int(pBDT))
+                antebrazoD.append(int(angD))
+                antebrazoI.append(int(angI))
+                punto_antebrazoD.append(int(pAntebrazoD))
+                punto_antebrazoI.append(int(pAntebrazoI))
+                # time.sleep(0.5)
+            else:
+                ##Se filtrará este valor después
+                pandasl.append(-10)
+                break
+
+        # Termina el bucle ----------------------------------
+
+        ##Post procesado
+        # Analizo los estiramientos
+        print("POST")
+
+        # +1 Hombro elevado, brazo rotado, brazos abducidos
+        # for i in range(len(estiramiento)):
+        #    print(estiramiento[i])
+        # Almacenamiento para analizis de datos
+        # with open("2.csv", "w", newline="") as archivo:
+        #     writer = csv.writer(archivo)
+        #     writer.writerow([filas, pandasl,estiramiento])
+
+        # Crear un objeto DataFrame
+
+        ##Impresión de numero de valores tomados
+        print("Se crea el DF")
+        # print(len(filas))
+        # #print(len(pandasl))
+        # print(len(angulos))
+        # print(len(punto_angulos))
+        # print(len(estiramiento))
+        # print(len(punto_estiramiento))
+        # print(len(antebrazoD))
+        # print(len(punto_antebrazoD))
+        # print(len(antebrazoI))
+        # print(len(punto_antebrazoI))
+        # Se almacenan las listas en el DF
+        df = pd.DataFrame({
+            "Columna_1": filas,
+            # "Columna 2": pandasl,
+            "Columna_3": angulos,
+            "Columna_4": punto_angulos,
+            "Columna_5": estiramiento,
+            "columna_6": punto_estiramiento,
+            "Columna_7": antebrazoD,
+            "Columna_8": punto_antebrazoD,
+            "Columna_9": antebrazoI,
+            "Columna_10": punto_antebrazoI
+        })
+
+        # Guardar el DataFrame en un archivo CSV
+        df.to_csv("4.csv")
+        print(df)
+        # - apoyo en el punto
+
+        # graficas puntos angulos
+        print("Debería comenzar a graficar")
+        puntos_a = df["Columna_4"].value_counts()
+        puntos_a.plot.pie()
+        df.plot(kind="scatter", x='Columna_1', y='Columna_4')
+        plt.show()
+
+        # graficas puntos estiramiento
+        # puntos_b=df["Columna_6"].value_counts()
+        # puntos_b.plot.pie()
+        # df.plot(kind = "scatter", x = 'Columna 1', y = 'Columna 6')
+
+        # graficas puntos antebrazo D e I
+        puntos_c = df["Columna_8"].value_counts()
+        puntos_c.plot.pie()
+        df.plot(kind="scatter", x='Columna_1', y='Columna_8')
+        plt.show()
+
+        puntos_d = df["Columna_10"].value_counts()
+        puntos_d.plot.pie()
+        df.plot(kind="scatter", x='Columna_1', y='Columna_10')
+        plt.show()
+
 
     def videoclick(self):
         self.frame1.destroy()
@@ -118,13 +319,26 @@ class ErgoMetric(Tk):
         self.btnFinalizar = Button(self.frame2, text="Finalizar", width=45, command=self.finalizar)
         self.btnFinalizar.grid(column=1, row=0, padx=5, pady=5)
 
-        self.btnAnalizar = Button(self.frame2, text="Analizar", width=45, command=self.analizarv)
-        self.btnAnalizar.grid(column=2, row=0, padx=5, pady=5)
+        #self.btnAnalizar = Button(self.frame2, text="Analizar", width=45, command=self.analizarv)
+        #self.btnAnalizar.grid(column=2, row=0, padx=5, pady=5)
 
         self.lblVideo = Label(self.frame2)
         self.lblVideo.grid(column=0, row=1, columnspan=3)
 
     def analizarv(self):
+        self.PBRder=0
+        self.PBRizq=0
+        self.PABRder=0
+        self.PABRizq=0
+        self.PCuello=0
+        self.PTOTAL=0
+
+        #self.ppoint = Toplevel()
+        #self.ppoint.title('Registro')
+        #self.ppoint.geometry('1000x1000')
+        #self.ppoint.iconbitmap('ergo.ico')
+        #self.ppoint.configure(bg=self.fondoo)
+
         self.frame3 = Frame(self, bg=self.fondoo, width=300, height=600)
         self.frame3.grid(row=0, column=0, columnspan=12, rowspan=15, sticky='nswe')
 
@@ -140,29 +354,54 @@ class ErgoMetric(Tk):
                               bg=self.fondoo)
         self.LabPBrazoD.grid(row=3, column=1, columnspan=2, sticky='w', padx=20, pady=10)
 
+        self.PBrazoD = Label(self.frame3, text=str(self.PBRder), font=('Hightower text', 20, 'bold'),
+                                       bg=self.fondoo)
+        self.PBrazoD.grid(row=4, column=1, columnspan=2, sticky='wE', padx=20, pady=10)
+
+
         self.LabPAnBrazoD = Label(self.frame3, text='Puntaje antebrazo: ', font=('Hightower text', 20, 'bold'),
                                   bg=self.fondoo)
         self.LabPAnBrazoD.grid(row=6, column=1, columnspan=2, sticky='w', padx=20, pady=10)
+        self.PAnBrazoD = Label(self.frame3, text=str(self.PABRder),
+                                         font=('Hightower text', 20, 'bold'),
+                                         bg=self.fondoo)
+        self.PAnBrazoD.grid(row=7, column=1, columnspan=2, sticky='wE', padx=20, pady=10)
 
 
         #izquierdo
         self.LabPBrazoI = Label(self.frame3, text='Puntaje brazo: ', font=('Hightower text', 20, 'bold'),
                                 bg=self.fondoo)
         self.LabPBrazoI.grid(row=3, column=10, columnspan=2, sticky='w', padx=20, pady=10)
+        self.PBrazoI = Label(self.frame3, text=str(self.PBRizq), font=('Hightower text', 20, 'bold'),
+                                       bg=self.fondoo)
+        self.PBrazoI.grid(row=4, column=10, columnspan=2, sticky='wE', padx=20, pady=10)
+
 
         self.LabPAnBrazoI = Label(self.frame3, text='Puntaje antebrazo: ', font=('Hightower text', 20, 'bold'),
                                 bg=self.fondoo)
         self.LabPAnBrazoI.grid(row=6, column=10, columnspan=2, sticky='w', padx=20, pady=10)
+        self.PAnBrazoI = Label(self.frame3, text=str(self.PABRizq),
+                                         font=('Hightower text', 20, 'bold'),
+                                         bg=self.fondoo)
+        self.PAnBrazoI.grid(row=7, column=10, columnspan=2, sticky='wE', padx=20, pady=10)
 
         #cuello
         self.LabPCuello = Label(self.frame3, text='Puntaje cuello: ', font=('Hightower text', 20, 'bold'),
                                   bg=self.fondoo)
         self.LabPCuello.grid(row=10, column=5, columnspan=3, sticky='W', pady=10)
+        self.PCuelloT = Label(self.frame3, text=str(self.PCuello), font=('Hightower text', 20, 'bold'),
+                                       bg=self.fondoo)
+        self.PCuelloT.grid(row=11, column=5, columnspan=3, sticky='WE', pady=10)
 
         #puntaje total
         self.LabPtotal = Label(self.frame3, text='PUNTAJE TOTAL: ', font=('Hightower text', 20, 'bold'),
                                 bg=self.fondoo)
         self.LabPtotal.grid(row=12, column=5, columnspan=3, sticky='W', pady=20)
+        self.Ptotal = Label(self.frame3, text=str(self.PTOTAL), font=('Hightower text', 20, 'bold'),
+                                      bg=self.fondoo)
+        self.Ptotal.grid(row=13, column=5, columnspan=3, sticky='WE', pady=20)
+
+
 
     def regisclick(self):
         #self.frame1.destroy()
@@ -223,31 +462,86 @@ class ErgoMetric(Tk):
     def iniciar(self):
         #global self.cap
         self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        self.analizarv()
         self.visualizar()
+
+
 
     def visualizar(self):
         #global cap
-        if self.cap is not None:
-            self.ret, self.frame = self.cap.read()
-            if self.ret == True:
-                self.frame = imutils.resize(self.frame, width=640)
-                self.frame = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
 
-                self.im = Image.fromarray(self.frame)
-                self.img = ImageTk.PhotoImage(image=self.im)
+        while self.cap is not None:
+            success, img = self.cap.read()
 
-                self.lblVideo.configure(image=self.img)
-                self.lblVideo.image = self.img
-                self.lblVideo.after(10, self.visualizar)
+            # IF: Como filtro de valores atípicos
+            if img is not None:
+                img = self.detector.findPose(img, False)
+                lmList = self.detector.findPosition(img, False)
+
+                # SI se encontró un cuerpo se procesará y mostrará esa data
+                if len(lmList) != 0:
+                    # CALCULO BRAZO--------------------------------------------------------
+                    # Angulo de brazo respecto al torso (puntuaciones)
+
+                    # DERECHA ---------------------------
+                    BRder = abs(self.detector.findAngle3D(img, 14, 12, 24))
+                    self.PBRder = self.detector.brazoPuntuation(BRder)
+
+                    # IZQUIERDA ---------------------------
+                    BRizq = abs(self.detector.findAngle3D(img, 13, 11, 23))
+                    self.PBRizq = self.detector.brazoPuntuation(BRizq)
+
+                    # CALCULO ANTEBRAZOS ---------------------------------------------------------------
+                    # DERECHA ---------------------------
+                    ABRder = abs(self.detector.findAngle3D(img, 12, 14, 16))
+                    self.PABRder = self.detector.anteBrazoPuntuation(BRder)
+
+                    # IZQUIERDA ---------------------------
+                    ABRizq = abs(self.detector.findAngle3D(img, 11, 13, 15))
+                    self.PABRizq = self.detector.anteBrazoPuntuation(BRizq)
+
+                    # CALCULO CUELLO ---------------------------------------------------------------
+                    # Promediacion
+                    head = []
+                    budy = []
+                    head = self.detector.promDot(img, 7, 8)
+                    budy = self.detector.promDot(img, 23, 24)
+                    cuello = self.detector.promDot(img, 11, 12)
+
+                    ANGcuello = (self.detector.findAngle3DbyVectors(img, head, cuello, budy, draw=True))
+                    self.PCuello = self.detector.cuelloPuntuation(ANGcuello)
+
+                    # PUNTAJE TOTAL
+                    self.TOTAL = self.PBRder + self.PBRizq + self.PABRder + self.PABRizq + self.PCuello
+                    # Todos estos valores impresos en el forms
+
+                    self.PBrazoD['text'] = str(self.PBRder)
+                    self.PBrazoI['text'] = str(self.PBRizq)
+                    self.PAnBrazoD['text'] = str(self.PABRder)
+                    self.PAnBrazoI['text'] = str(self.PABRizq)
+                    self.PCuelloT['text'] = str(self.PCuello)
+                    self.Ptotal['text'] = str(self.PTOTAL)
+
+                # Reajuste de tamaños: si la imagen sale muy grande o pequeña solo cambia el valor de la escala
+                escala = 1
+                width, height, _ = img.shape
+                alto = int(width * escala)
+                ancho = int(height * escala)
+                img = cv2.resize(img, (ancho, alto))
+                cv2.imshow("Image", img)
+                cv2.waitKey(1)
+
+                self.count += 1
+
             else:
-                self.lblVideo.image = ""
-                self.cap.release()
+                ##En caso haya un error, se mantiene el valor anterior
+                pass
 
 
     def finalizar(self):
         #global cap
         self.cap.release()
-        #aqui debe estar el analisis del video
+        self.ppoint.destroy()
 
 
     def restar(self):
